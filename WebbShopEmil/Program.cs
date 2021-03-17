@@ -11,16 +11,18 @@ namespace WebbShopEmil
             Seeder.Seed();
             WebbShopAPI shop = new WebbShopAPI();
             var userId = shop.Login("Administrator", "CodicRulez");
-            Console.WriteLine(shop.DeleteCategory(userId, 2));
+            var users = shop.FindUser(userId, "an");
+            //Console.WriteLine(shop.DeleteCategory(userId, 2));
 
 
-
-            //var list = shop.ListUsers(1);
-            //foreach (var user in list)
-            //{
-            //    Console.WriteLine(user.Name);
-            //}
-
+            foreach (var user in shop.ListUsers(userId))
+            {
+                Console.WriteLine(user.Name);
+            }
+            foreach (var category in shop.GetCategories())
+            {
+                Console.WriteLine($"Name: {category.Name}");
+            }
             Console.ReadKey();
         }
     }

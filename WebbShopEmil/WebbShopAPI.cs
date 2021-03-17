@@ -129,12 +129,12 @@ namespace WebbShopEmil
                     {
                         Title = book.Title,
                         Author = book.Author,
-                        CategoryId = book.Category, // Ä-----------------------------------------------------------------ndra
+                        CategoryId = book.Category, // Ä-----------------------------------------------------------------ndra catId till cat
                         Price = book.Price,
                         PurchasedDate = DateTime.Now,
                         User = user
                     });
-                    book.Amount --;
+                    book.Amount--;
                     db.Books.Update(book);
                     db.SaveChanges();
                     return true;
@@ -145,9 +145,8 @@ namespace WebbShopEmil
 
         public bool DeleteBook(int adminId, int bookId)
         {
-           
-            if (UserIsAdminAndLoggedIn(adminId) 
-                && BookExists(bookId, out Book book))
+
+            if (UserIsAdminAndLoggedIn(adminId) && BookExists(bookId, out Book book))
             {
                 book.Amount--;
                 if (book.Amount > zero)
@@ -168,28 +167,16 @@ namespace WebbShopEmil
 
         public bool DeleteCategory(int adminId, int categoryId)
         {
-            if(UserIsAdminAndLoggedIn(adminId ) && CategoryExists(categoryId, out var category))
+            if (UserIsAdminAndLoggedIn(adminId) && CategoryExists(categoryId, out var category))
             {
-                //try
-                //{
-                //    db.BookCategories.Remove(category);
-                //    db.SaveChanges();
-                //    return true;
-                //}
-                //catch (Exception)
-                //{
-                //    return false;
-                //}
-
                 var books = (from b in db.Books where b.Category == category select b);
 
-                if(books.Count() == 0)
+                if (books.Count() == zero)
                 {
                     db.BookCategories.Remove(category);
                     db.SaveChanges();
                     return true;
                 }
-              
             }
             return false;
         }
@@ -200,14 +187,14 @@ namespace WebbShopEmil
         /// <param name="adminId"></param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public IEnumerable<User> FindUser(int adminId, string keyword)
+        public List<User> FindUser(int adminId, string keyword)
         {
-            var user = (from u in db.Users where u.Id == adminId && u.SessionTimer > DateTime.Now.AddMinutes(maxSessionTime) select u).FirstOrDefault();
-            if (user.IsAdmin == true)
+            var users = new List<User>();
+            if (UserIsAdminAndLoggedIn(adminId))
             {
-                return from u in db.Users where u.Name.Contains(keyword) select u;
+                users = (from u in db.Users where u.Name.Contains(keyword) orderby u.Name select u).ToList();
             }
-            return new User[0];
+            return users;
         }
 
         /// <summary>
@@ -215,9 +202,9 @@ namespace WebbShopEmil
         /// </summary>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public IEnumerable<Book> GetAuthors(string keyword)
+        public List<Book> GetAuthors(string keyword)
         {
-            return from b in db.Books where b.Author.Contains(keyword) select b;
+           return (from b in db.Books where b.Author.Contains(keyword) orderby b.Title select b).ToList();
         }
 
         /// <summary>
@@ -225,9 +212,9 @@ namespace WebbShopEmil
         /// </summary>
         /// <param name="categoryId"></param>
         /// <returns></returns>
-        public IEnumerable<Book> GetAvailableBooks(int categoryId)
+        public List<Book> GetAvailableBooks(int categoryId)
         {
-            return from b in db.Books where b.Category.Id == categoryId && b.Amount > zero select b;
+            return (from b in db.Books where b.Category.Id == categoryId && b.Amount > zero orderby b.Title select b).ToList();
         }
 
         /// <summary>
@@ -235,9 +222,9 @@ namespace WebbShopEmil
         /// </summary>
         /// <param name="bookId"></param>
         /// <returns></returns>
-        public IEnumerable<Book> GetBook(int bookId)
+        public List<Book> GetBook(int bookId)
         {
-            return from b in db.Books where b.Id == bookId select b;
+            return (from b in db.Books where b.Id == bookId select b).ToList();
         }
 
         /// <summary>
@@ -245,18 +232,18 @@ namespace WebbShopEmil
         /// </summary>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public IEnumerable<Book> GetBooks(string keyword)
+        public List<Book> GetBooks(string keyword)
         {
-            return from b in db.Books where b.Title.Contains(keyword) select b;
+            return (from b in db.Books where b.Title.Contains(keyword) orderby b.Title  select b).ToList();
         }
 
         /// <summary>
         /// Get a list of all categories, order by name.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<BookCategory> GetCategories()
+        public List<BookCategory> GetCategories()
         {
-            return from c in db.BookCategories orderby c.Name select c;
+            return (from c in db.BookCategories orderby c.Name select c).ToList();
         }
 
         /// <summary>
@@ -264,9 +251,9 @@ namespace WebbShopEmil
         /// </summary>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public IEnumerable<BookCategory> GetCategories(string keyword)
+        public List<BookCategory> GetCategories(string keyword)
         {
-            return from c in db.BookCategories where c.Name.Contains(keyword) orderby c.Name select c;
+            return (from c in db.BookCategories where c.Name.Contains(keyword) orderby c.Name select c).ToList();
         }
 
         /// <summary>
@@ -274,9 +261,9 @@ namespace WebbShopEmil
         /// </summary>
         /// <param name="categoryID"></param>
         /// <returns></returns>
-        public IEnumerable<Book> GetCategory(int categoryId)
+        public List<Book> GetCategory(int categoryId)
         {
-            return from c in db.Books where c.Category.Id == categoryId select c;
+            return (from c in db.Books where c.Category.Id == categoryId orderby c.Title select c).ToList();
         }
 
         /// <summary>
@@ -284,14 +271,14 @@ namespace WebbShopEmil
         /// </summary>
         /// <param name="adminId"></param>
         /// <returns></returns>
-        public IEnumerable<User> ListUsers(int adminId)
+        public List<User> ListUsers(int adminId)
         {
-            var user = (from u in db.Users where u.Id == adminId && u.SessionTimer > DateTime.Now.AddMinutes(maxSessionTime) select u).FirstOrDefault();
-            if (user.IsAdmin == true)
+            var users = new List<User>();
+            if (UserIsAdminAndLoggedIn(adminId))
             {
-                return from u in db.Users orderby u.Name select u;
+                users = (from u in db.Users orderby u.Name select u).ToList();
             }
-            return new User[0];
+            return users;
         }
 
         /// <summary>
@@ -338,10 +325,9 @@ namespace WebbShopEmil
         /// <returns></returns>
         public string Ping(int userId)
         {
-            var user = from u in db.Users where u.Id == userId && u.SessionTimer > DateTime.Now.AddMinutes(maxSessionTime) select u;
-            if (user != null)
+            var user = (from u in db.Users where u.Id == userId && u.IsActive select u).FirstOrDefault();
+            if (user != null && user.SessionTimer > DateTime.Now.AddMinutes(maxSessionTime))
             {
-
                 return "Pong";
             }
             return string.Empty;
@@ -362,6 +348,7 @@ namespace WebbShopEmil
                 if (user == null)
                 {
                     db.Users.Add(new User { Name = name, Password = password, IsAdmin = false });
+                    db.Users.Update(user);
                     db.SaveChanges();
                     return true;
                 }
@@ -370,7 +357,10 @@ namespace WebbShopEmil
         }
         public void SetAmount(int adminId, int bookId)
         {
+            if (UserIsAdminAndLoggedIn(adminId))
+            {
 
+            }
         }
         /// <summary>
         /// 
@@ -381,21 +371,16 @@ namespace WebbShopEmil
         /// <param name="author"></param>
         /// <param name="price"></param>
         /// <returns></returns>
-        public bool UpdateBook(int adminId, int id, string title, string author, int price)
+        public bool UpdateBook(int adminId, int bookId, string title, string author, int price)
         {
-            var user = (from u in db.Users where u.Id == adminId && u.SessionTimer > DateTime.Now.AddMinutes(maxSessionTime) select u).FirstOrDefault();
-            if (user.IsAdmin == true)
+            if (UserIsAdminAndLoggedIn(adminId) && BookExists(bookId, out Book book))
             {
-                var book = (from b in db.Books select b).FirstOrDefault();
-                if (book.Id == id)
-                {
-                    book.Title = title;
-                    book.Author = author;
-                    book.Price = price;
-                    db.Books.Update(book);
-                    db.SaveChanges();
-                    return true;
-                }
+                book.Title = title;
+                book.Author = author;
+                book.Price = price;
+                db.Books.Update(book);
+                db.SaveChanges();
+                return true;
             }
             return false;
         }
@@ -408,17 +393,12 @@ namespace WebbShopEmil
         /// <returns></returns>
         public bool UpdateCategory(int adminId, int categoryId, string name)
         {
-            var user = (from u in db.Users where u.Id == adminId && u.SessionTimer > DateTime.Now.AddMinutes(maxSessionTime) select u).FirstOrDefault();
-            if (user.IsAdmin == true)
+            if (UserIsAdminAndLoggedIn(adminId) && CategoryExists(categoryId, out BookCategory category))
             {
-                var category = (from c in db.BookCategories select c).FirstOrDefault();
-                if (category.Id == categoryId)
-                {
                     category.Name = name;
                     db.BookCategories.Update(category);
                     db.SaveChanges();
                     return true;
-                }
             }
             return false;
         }
