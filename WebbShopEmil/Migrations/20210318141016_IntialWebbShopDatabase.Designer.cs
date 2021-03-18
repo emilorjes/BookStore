@@ -10,8 +10,8 @@ using WebbShopEmil.Database;
 namespace WebbShopEmil.Migrations
 {
     [DbContext(typeof(WebbShopContext))]
-    [Migration("20210315074041_InitialDatabase")]
-    partial class InitialDatabase
+    [Migration("20210318141016_IntialWebbShopDatabase")]
+    partial class IntialWebbShopDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -34,7 +34,7 @@ namespace WebbShopEmil.Migrations
                     b.Property<string>("Author")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CategoryIdId")
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<int>("Price")
@@ -45,7 +45,7 @@ namespace WebbShopEmil.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryIdId");
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Books");
                 });
@@ -58,6 +58,7 @@ namespace WebbShopEmil.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -116,9 +117,11 @@ namespace WebbShopEmil.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("SessionTimer")
@@ -133,14 +136,14 @@ namespace WebbShopEmil.Migrations
                 {
                     b.HasOne("WebbShopEmil.Models.BookCategory", "Category")
                         .WithMany()
-                        .HasForeignKey("CategoryIdId");
+                        .HasForeignKey("CategoryId");
 
                     b.Navigation("Category");
                 });
 
             modelBuilder.Entity("WebbShopEmil.Models.SoldBook", b =>
                 {
-                    b.HasOne("WebbShopEmil.Models.BookCategory", "Category")
+                    b.HasOne("WebbShopEmil.Models.BookCategory", "CategoryId")
                         .WithMany()
                         .HasForeignKey("CategoryIdId");
 
@@ -148,7 +151,7 @@ namespace WebbShopEmil.Migrations
                         .WithMany()
                         .HasForeignKey("UserId");
 
-                    b.Navigation("Category");
+                    b.Navigation("CategoryId");
 
                     b.Navigation("User");
                 });

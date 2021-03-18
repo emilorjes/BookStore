@@ -123,12 +123,19 @@ namespace WebbShopEmil
         {
             if (UserIsAdminAndLoggedIn(adminId))
             {
-                var user = (from u in db.Users where u.Name == name && u.Password == password select u).FirstOrDefault();
-                if (user == null && password != string.Empty)
+                try
                 {
-                    db.Users.Add(new User { Name = name, Password = password, IsAdmin = false });
-                    db.SaveChanges();
-                    return true;
+                    var user = (from u in db.Users where u.Name == name && u.Password == password select u).FirstOrDefault();
+                    if (user == null && password != string.Empty)
+                    {
+                        db.Users.Add(new User { Name = name, Password = password, IsAdmin = false, IsActive = true });
+                        db.SaveChanges();
+                        return true;
+                    }
+                }
+                catch (Exception)
+                {
+
                 }
             }
             return false;
@@ -405,7 +412,7 @@ namespace WebbShopEmil
                 var user = (from u in db.Users where u.Name == name && u.Password == password select u).FirstOrDefault();
                 if (user == null)
                 {
-                    db.Users.Add(new User { Name = name, Password = password, IsAdmin = false });
+                    db.Users.Add(new User { Name = name, Password = password, IsAdmin = false, IsActive = true }); ;
                     db.Users.Update(user);
                     db.SaveChanges();
                     return true;

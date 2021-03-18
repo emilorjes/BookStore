@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WebbShopEmil.Migrations
 {
-    public partial class InitialDatabase : Migration
+    public partial class IntialWebbShopDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -13,7 +13,7 @@ namespace WebbShopEmil.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -26,8 +26,8 @@ namespace WebbShopEmil.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastLogin = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SessionTimer = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -46,16 +46,16 @@ namespace WebbShopEmil.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Author = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CategoryId = table.Column<int>(type: "int", nullable: true),
                     Price = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<int>(type: "int", nullable: false),
-                    CategoryIdId = table.Column<int>(type: "int", nullable: true)
+                    Amount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Books", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Books_BookCategories_CategoryIdId",
-                        column: x => x.CategoryIdId,
+                        name: "FK_Books_BookCategories_CategoryId",
+                        column: x => x.CategoryId,
                         principalTable: "BookCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -92,9 +92,9 @@ namespace WebbShopEmil.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Books_CategoryIdId",
+                name: "IX_Books_CategoryId",
                 table: "Books",
-                column: "CategoryIdId");
+                column: "CategoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SoldBooks_CategoryIdId",

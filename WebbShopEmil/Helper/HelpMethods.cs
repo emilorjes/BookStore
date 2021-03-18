@@ -76,6 +76,11 @@ namespace WebbShopEmil.Helper
             return user != null;
         }
 
+        /// <summary>
+        /// Prints out a list of all books by category.
+        /// </summary>
+        /// <param name="webbShop"></param>
+        /// <param name="categoryId"></param>
         public static void ForeachBooksByCategory(WebbShopAPI webbShop, int categoryId)
         {
             foreach (var book in webbShop.GetAvailableBooks(categoryId))
@@ -84,6 +89,11 @@ namespace WebbShopEmil.Helper
             }
         }
 
+        /// <summary>
+        /// Prints out a list of authors that contains keyword. 
+        /// </summary>
+        /// <param name="webbShop"></param>
+        /// <param name="keyword"></param>
         public static void ForeachAuthorsKeyword(WebbShopAPI webbShop, string keyword)
         {
             foreach (var book in webbShop.GetAuthors(keyword))
@@ -92,6 +102,11 @@ namespace WebbShopEmil.Helper
             }
         }
 
+        /// <summary>
+        /// Prints out a list of books that contains keyword. 
+        /// </summary>
+        /// <param name="webbShop"></param>
+        /// <param name="keyword"></param>
         public static void ForeachBooksKeyword(WebbShopAPI webbShop, string keyword)
         {
             foreach (var book in webbShop.GetBooks(keyword))
@@ -100,6 +115,11 @@ namespace WebbShopEmil.Helper
             }
         }
 
+        /// <summary>
+        /// Prints out a list of categories that contains keyword. 
+        /// </summary>
+        /// <param name="webbShop"></param>
+        /// <param name="keyword"></param>
         public static void ForeachCategoriesKeyword(WebbShopAPI webbShop, string keyword)
         {
             foreach (var category in webbShop.GetCategories(keyword))
@@ -108,6 +128,10 @@ namespace WebbShopEmil.Helper
             }
         }
 
+        /// <summary>
+        /// Prints out a list of all categories. 
+        /// </summary>
+        /// <param name="webbShop"></param>
         public static void ForeachCategories(WebbShopAPI webbShop)
         {
             foreach (var category in webbShop.GetCategories())
@@ -116,9 +140,14 @@ namespace WebbShopEmil.Helper
             }
         }
 
-        public static void ForeachUsers(WebbShopAPI webbShop, int userId)
+        /// <summary>
+        /// Prints out a list of all users.
+        /// </summary>
+        /// <param name="webbShop"></param>
+        /// <param name="adminId"></param>
+        public static void ForeachUsers(WebbShopAPI webbShop, int adminId)
         {
-            foreach (var user in webbShop.ListUsers(userId))
+            foreach (var user in webbShop.ListUsers(adminId))
             {
                 Console.WriteLine($"User name: {user.Name}");
             }
