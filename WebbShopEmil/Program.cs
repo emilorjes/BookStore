@@ -12,48 +12,58 @@ namespace WebbShopEmil
         {
             Seeder.Seed();
             WebbShopAPI webbShop = new WebbShopAPI();
-            
+
+            Line();
             var userId = webbShop.Login("TestCustomer", "Codic2021");
             Console.WriteLine($"User with Id {userId} is logged in");
-            Console.WriteLine("-----------------------\n");
+            Line();
 
-            Console.WriteLine("List all categories:");
-            ForeachCategories(webbShop);
-            Console.WriteLine("-----------------------\n");
+            GreenTextWL("List all categories:");
+            ForeachGetCategories(webbShop);
+            Line();
 
-            Console.WriteLine("Print list with all books by category:");
-            ForeachBooksByCategory(webbShop, 2);
-            Console.WriteLine("-----------------------\n");
+            GreenTextWL("List categories by keyword:");
+            ForeachGetCategoriesKeyword(webbShop,"h");
+            Line();
 
-            Console.WriteLine("Show a book with a specific id and show book amount");
-            var book = webbShop.GetBook(2);
-            Console.WriteLine($"Book amount: {book.Amount} ID: {book.Id}");
-            Console.WriteLine("-----------------------\n");
+            GreenTextWL("List books by category:");
+            ForeachGetAvailableBooks(webbShop, 2);
+            Line();
 
-            Console.WriteLine("Köper bok om boken finns.");
-            webbShop.BuyBook(userId, book.Id);
-            Console.WriteLine($"Book amount: {book.Amount} ID: {book.Id}");
-            Console.WriteLine("-----------------------\n");
-            
-            Console.WriteLine("-----------------------\n");
-            Console.WriteLine("-----------------------\n");
-            Console.WriteLine("-----------------------\n");
+            GreenTextWL("List books by keyword:");
+            ForeachGetBooksKeyword(webbShop, "i");
+            Line();
+
+            GreenTextWL("List authors by keyword:");
+            ForeachGetAuthorsKeyword(webbShop, "a");
+            Line();
+
+            GreenTextWL("Show a book with a specific id and show book amount");
+            var book = webbShop.GetBook(4);
+            Console.WriteLine($"Id:{book.Id}. Book amount: {book.Amount}");
+            Line();
+
+            Console.WriteLine($"Buy book = { webbShop.BuyBook(userId, book.Id)}");
+            Console.WriteLine($"Id:{book.Id}. Book amount: {book.Amount}");
+            Line();
 
             var adminId = webbShop.Login("Administrator", "CodicRulez");
             Console.WriteLine($"User with Id {adminId} is logged in");
-            Console.WriteLine("-----------------------\n");
+            Line();
 
-            Console.WriteLine("Add category.");
-            webbShop.AddCategory(adminId, "Documentary");
-            Console.WriteLine("-----------------------\n");
+            Console.WriteLine($"Add category = { webbShop.AddCategory(adminId, "Documentary")}");
+            Line();
 
-            Console.WriteLine("Move book to category.");
-            webbShop.AddBookToCategory(adminId, book.Id, 2);
-            Console.WriteLine("-----------------------\n");
+            Console.WriteLine($"Add book to category = {webbShop.AddBookToCategory(adminId, book.Id, 3)}");
+            Line();
 
-            Console.WriteLine("Add new user");
-            var newUser = webbShop.AddUser(adminId, null, null);
-            Console.WriteLine(newUser);
+            Console.WriteLine($"Add new user = {webbShop.AddUser(adminId, "Emil", "Lime")}");
+            Line();
+            
+            GreenTextWL("List all users:");
+            ForeachListUsers(webbShop, adminId);
+            Line();
+          
             Console.ReadKey();
 
 

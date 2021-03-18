@@ -27,15 +27,20 @@ namespace WebbShopEmil
         /// <param name="amount"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool AddBook(int adminId,
+        public bool AddBook(
+            int adminId,
             string title,
-            string author, int price,
+            string author,
+            int price,
             int amount,
             int id = default)
         {
             if (UserIsAdminAndLoggedIn(adminId))
             {
-                var book = (from b in db.Books where b.Id == id select b).FirstOrDefault();
+                var book = (from b
+                            in db.Books
+                            where b.Id == id
+                            select b).FirstOrDefault();
                 if (book != null)
                 {
                     book.Amount += amount;
@@ -74,7 +79,8 @@ namespace WebbShopEmil
 
                 if (BookExists(bookId, out var book))
                 {
-                    if (CategoryExists(categoryId, out var category))
+                    if (CategoryExists(categoryId, out var category)
+                        && categoryId != book.Category.Id)
                     {
                         book.Category = category;
                         db.Books.Update(book);
@@ -98,7 +104,10 @@ namespace WebbShopEmil
         {
             if (UserIsAdminAndLoggedIn(adminId))
             {
-                var category = (from c in db.BookCategories where c.Name == name select c).FirstOrDefault();
+                var category = (from c
+                                in db.BookCategories
+                                where c.Name == name
+                                select c).FirstOrDefault();
                 if (category == null)
                 {
                     db.BookCategories.Add(new BookCategory { Name = name });
@@ -125,10 +134,21 @@ namespace WebbShopEmil
             {
                 try
                 {
-                    var user = (from u in db.Users where u.Name == name && u.Password == password select u).FirstOrDefault();
+                    var user = (from u
+                                in db.Users
+                                where u.Name == name
+                                && u.Password == password
+                                select u).FirstOrDefault();
+
                     if (user == null && password != string.Empty)
                     {
-                        db.Users.Add(new User { Name = name, Password = password, IsAdmin = false, IsActive = true });
+                        db.Users.Add(new User
+                        {
+                            Name = name,
+                            Password = password,
+                            IsAdmin = false,
+                            IsActive = true
+                        });
                         db.SaveChanges();
                         return true;
                     }
@@ -151,8 +171,16 @@ namespace WebbShopEmil
         /// <returns></returns>
         public bool BuyBook(int userId, int bookId)
         {
-            var user = (from u in db.Users where u.Id == userId && u.IsActive && u.SessionTimer > DateTime.Now.AddMinutes(MaxSessionTime) select u).FirstOrDefault();
-            if (user != null && BookExists(bookId, out Book book) && book.Amount > Zero)
+            var user = (from u
+                        in db.Users
+                        where u.Id == userId
+                        && u.IsActive
+                        && u.SessionTimer > DateTime.Now.AddMinutes(MaxSessionTime)
+                        select u).FirstOrDefault();
+
+            if (user != null
+                && BookExists(bookId, out Book book)
+                && book.Amount > Zero)
             {
                 if (book != null)
                 {
@@ -179,15 +207,14 @@ namespace WebbShopEmil
         /// If book amount is more than zero subtract amount by one.
         /// If book exists and amount is less or equal to zero,
         /// delete book.
-        /// 
         /// </summary>
         /// <param name="adminId"></param>
         /// <param name="bookId"></param>
         /// <returns></returns>
         public bool DeleteBook(int adminId, int bookId)
         {
-
-            if (UserIsAdminAndLoggedIn(adminId) && BookExists(bookId, out Book book))
+            if (UserIsAdminAndLoggedIn(adminId)
+                && BookExists(bookId, out Book book))
             {
                 book.Amount--;
                 if (book.Amount > Zero)
@@ -201,7 +228,6 @@ namespace WebbShopEmil
                     db.SaveChanges();
                     return true;
                 }
-
             }
             return false;
         }
@@ -217,9 +243,13 @@ namespace WebbShopEmil
         /// <returns></returns>
         public bool DeleteCategory(int adminId, int categoryId)
         {
-            if (UserIsAdminAndLoggedIn(adminId) && CategoryExists(categoryId, out var category))
+            if (UserIsAdminAndLoggedIn(adminId)
+                && CategoryExists(categoryId, out var category))
             {
-                var books = (from b in db.Books where b.Category == category select b);
+                var books = (from b
+                             in db.Books
+                             where b.Category == category
+                             select b);
 
                 if (books.Count() == Zero)
                 {
@@ -243,7 +273,11 @@ namespace WebbShopEmil
             var users = new List<User>();
             if (UserIsAdminAndLoggedIn(adminId))
             {
-                users = (from u in db.Users where u.Name.Contains(keyword) orderby u.Name select u).ToList();
+                users = (from u
+                         in db.Users
+                         where u.Name.Contains(keyword)
+                         orderby u.Name
+                         select u).ToList();
             }
             return users;
         }
@@ -256,7 +290,11 @@ namespace WebbShopEmil
         /// <returns></returns>
         public List<Book> GetAuthors(string keyword)
         {
-            return (from b in db.Books where b.Author.Contains(keyword) orderby b.Title select b).ToList();
+            return (from b
+                    in db.Books
+                    where b.Author.Contains(keyword)
+                    orderby b.Title
+                    select b).ToList();
         }
 
         /// <summary>
@@ -267,7 +305,12 @@ namespace WebbShopEmil
         /// <returns></returns>
         public List<Book> GetAvailableBooks(int categoryId)
         {
-            return (from b in db.Books where b.Category.Id == categoryId && b.Amount > Zero orderby b.Title select b).ToList();
+            return (from b
+                    in db.Books
+                    where b.Category.Id == categoryId
+                    && b.Amount > Zero
+                    orderby b.Title
+                    select b).ToList();
         }
 
         /// <summary>
@@ -278,7 +321,10 @@ namespace WebbShopEmil
         /// <returns></returns>
         public Book GetBook(int bookId)
         {
-            return (from b in db.Books where b.Id == bookId select b).Include(b => b.Category).FirstOrDefault();
+            return (from b
+                    in db.Books
+                    where b.Id == bookId
+                    select b).Include(b => b.Category).FirstOrDefault();
         }
 
         /// <summary>
@@ -289,7 +335,11 @@ namespace WebbShopEmil
         /// <returns></returns>
         public List<Book> GetBooks(string keyword)
         {
-            return (from b in db.Books where b.Title.Contains(keyword) orderby b.Title select b).ToList();
+            return (from b
+                    in db.Books
+                    where b.Title.Contains(keyword)
+                    orderby b.Title
+                    select b).ToList();
         }
 
         /// <summary>
@@ -299,7 +349,10 @@ namespace WebbShopEmil
         /// <returns></returns>
         public List<BookCategory> GetCategories()
         {
-            return (from c in db.BookCategories orderby c.Name select c).ToList();
+            return (from c
+                    in db.BookCategories
+                    orderby c.Name
+                    select c).ToList();
         }
 
         /// <summary>
@@ -310,7 +363,11 @@ namespace WebbShopEmil
         /// <returns></returns>
         public List<BookCategory> GetCategories(string keyword)
         {
-            return (from c in db.BookCategories where c.Name.Contains(keyword) orderby c.Name select c).ToList();
+            return (from c
+                    in db.BookCategories
+                    where c.Name.Contains(keyword)
+                    orderby c.Name
+                    select c).ToList();
         }
 
         /// <summary>
@@ -321,7 +378,11 @@ namespace WebbShopEmil
         /// <returns></returns>
         public List<Book> GetCategory(int categoryId)
         {
-            return (from c in db.Books where c.Category.Id == categoryId orderby c.Title select c).ToList();
+            return (from c
+                    in db.Books
+                    where c.Category.Id == categoryId
+                    orderby c.Title
+                    select c).ToList();
         }
 
         /// <summary>
@@ -335,7 +396,10 @@ namespace WebbShopEmil
             var users = new List<User>();
             if (UserIsAdminAndLoggedIn(adminId))
             {
-                users = (from u in db.Users orderby u.Name select u).ToList();
+                users = (from u
+                         in db.Users
+                         orderby u.Name
+                         select u).ToList();
             }
             return users;
         }
@@ -349,7 +413,13 @@ namespace WebbShopEmil
         /// <returns></returns>
         public int Login(string username, string password)
         {
-            var user = (from u in db.Users where u.Name == username && u.Password == password && u.IsActive select u).FirstOrDefault();
+            var user = (from u
+                        in db.Users
+                        where u.Name == username
+                        && u.Password == password
+                        && u.IsActive
+                        select u).FirstOrDefault();
+
             if (user != null)
             {
                 user.SessionTimer = DateTime.Now;
@@ -369,7 +439,11 @@ namespace WebbShopEmil
         /// <returns></returns>
         public void Logout(int userId)
         {
-            var user = (from u in db.Users where u.Id == userId select u).FirstOrDefault();
+            var user = (from u
+                        in db.Users
+                        where u.Id == userId
+                        select u).FirstOrDefault();
+
             if (user != null)
             {
                 user.SessionTimer = DateTime.MinValue;
@@ -386,7 +460,8 @@ namespace WebbShopEmil
         /// <returns></returns>
         public string Ping(int userId)
         {
-            if (UserExists(userId, out User user) && user.SessionTimer > DateTime.Now.AddMinutes(MaxSessionTime))
+            if (UserExists(userId, out User user)
+                && user.SessionTimer > DateTime.Now.AddMinutes(MaxSessionTime))
             {
                 user.SessionTimer = DateTime.Now;
                 db.Users.Update(user);
@@ -409,10 +484,21 @@ namespace WebbShopEmil
         {
             if (password == passwordVerify)
             {
-                var user = (from u in db.Users where u.Name == name && u.Password == password select u).FirstOrDefault();
+                var user = (from u
+                            in db.Users
+                            where u.Name == name
+                            && u.Password == password
+                            select u).FirstOrDefault();
+
                 if (user == null)
                 {
-                    db.Users.Add(new User { Name = name, Password = password, IsAdmin = false, IsActive = true }); ;
+                    db.Users.Add(new User
+                    {
+                        Name = name,
+                        Password = password,
+                        IsAdmin = false,
+                        IsActive = true
+                    }); ;
                     db.Users.Update(user);
                     db.SaveChanges();
                     return true;
@@ -431,7 +517,8 @@ namespace WebbShopEmil
         /// <param name="amount"></param>
         public void SetAmount(int adminId, int bookId, int amount)
         {
-            if (UserIsAdminAndLoggedIn(adminId) && BookExists(bookId, out Book book))
+            if (UserIsAdminAndLoggedIn(adminId)
+                && BookExists(bookId, out Book book))
             {
                 book.Amount = amount;
                 db.Books.Update(book);
@@ -450,9 +537,15 @@ namespace WebbShopEmil
         /// <param name="author"></param>
         /// <param name="price"></param>
         /// <returns></returns>
-        public bool UpdateBook(int adminId, int bookId, string title, string author, int price)
+        public bool UpdateBook(
+            int adminId,
+            int bookId,
+            string title,
+            string author,
+            int price)
         {
-            if (UserIsAdminAndLoggedIn(adminId) && BookExists(bookId, out Book book))
+            if (UserIsAdminAndLoggedIn(adminId)
+                && BookExists(bookId, out Book book))
             {
                 book.Title = title;
                 book.Author = author;
@@ -475,7 +568,8 @@ namespace WebbShopEmil
         /// <returns></returns>
         public bool UpdateCategory(int adminId, int categoryId, string name)
         {
-            if (UserIsAdminAndLoggedIn(adminId) && CategoryExists(categoryId, out BookCategory category))
+            if (UserIsAdminAndLoggedIn(adminId)
+                && CategoryExists(categoryId, out BookCategory category))
             {
                 category.Name = name;
                 db.BookCategories.Update(category);
