@@ -13,14 +13,16 @@ namespace WebbShopEmil.Helper
         public static WebbShopContext db = new WebbShopContext();
         private const int MaxSessionTime = -15;
         
+        // Lånat denna metoden av David Ström,
+        // han har förklarat för mig hur denna metod fungerar och varför vi använder den.
         /// <summary>
-        /// Hjälp från david
+        /// Checks if user is an admin,
+        /// and if user is logged in.
         /// </summary>
         /// <param name="adminId"></param>
         /// <returns></returns>
         public static bool UserIsAdminAndLoggedIn(int adminId)
         {
-
             var adminUser = (from u in db.Users
                              where u.Id == adminId
                              && u.IsActive == true
@@ -31,8 +33,10 @@ namespace WebbShopEmil.Helper
             return adminUser != null;
         }
 
+        // Lånat denna metoden av David Ström,
+        // han har förklarat för mig hur denna metod fungerar och varför vi använder den.
         /// <summary>
-        /// Hjälp från david
+        /// Checks if book exists.
         /// </summary>
         /// <param name="bookId"></param>
         /// <param name="book"></param>
@@ -44,8 +48,10 @@ namespace WebbShopEmil.Helper
             return book != null;
         }
 
+        // Lånat denna metoden av David Ström,
+        // han har förklarat för mig hur denna metod fungerar och varför vi använder den.
         /// <summary>
-        /// Hjälp från david
+        /// Checks if category exists.
         /// </summary>
         /// <param name="categoryId"></param>
         /// <param name="category"></param>
@@ -54,6 +60,68 @@ namespace WebbShopEmil.Helper
         {
             category = (from c in db.BookCategories where c.Id == categoryId select c).FirstOrDefault();
             return category != null;
+        }
+
+        // Lånat denna metoden av David Ström,
+        // han har förklarat för mig hur denna metod fungerar och varför vi använder den.
+        /// <summary>
+        /// Checks if user exists.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public static bool UserExists(int userId, out User user)
+        {
+            user = (from u in db.Users where u.Id == userId select u).FirstOrDefault();
+            return user != null;
+        }
+
+        public static void ForeachBooksByCategory(WebbShopAPI webbShop, int categoryId)
+        {
+            foreach (var book in webbShop.GetAvailableBooks(categoryId))
+            {
+                Console.WriteLine($"Book title: {book.Title}");
+            }
+        }
+
+        public static void ForeachAuthorsKeyword(WebbShopAPI webbShop, string keyword)
+        {
+            foreach (var book in webbShop.GetAuthors(keyword))
+            {
+                Console.WriteLine($"Book author: {book.Author}");
+            }
+        }
+
+        public static void ForeachBooksKeyword(WebbShopAPI webbShop, string keyword)
+        {
+            foreach (var book in webbShop.GetBooks(keyword))
+            {
+                Console.WriteLine($"Book title: {book.Title}");
+            }
+        }
+
+        public static void ForeachCategoriesKeyword(WebbShopAPI webbShop, string keyword)
+        {
+            foreach (var category in webbShop.GetCategories(keyword))
+            {
+                Console.WriteLine($"Category name: {category.Name}");
+            }
+        }
+
+        public static void ForeachCategories(WebbShopAPI webbShop)
+        {
+            foreach (var category in webbShop.GetCategories())
+            {
+                Console.WriteLine($"Category name: {category.Name}");
+            }
+        }
+
+        public static void ForeachUsers(WebbShopAPI webbShop, int userId)
+        {
+            foreach (var user in webbShop.ListUsers(userId))
+            {
+                Console.WriteLine($"User name: {user.Name}");
+            }
         }
     }
 }

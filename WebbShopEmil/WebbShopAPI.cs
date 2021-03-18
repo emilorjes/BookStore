@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -8,12 +9,16 @@ using static WebbShopEmil.Helper.HelpMethods;
 
 namespace WebbShopEmil
 {
-    class WebbShopAPI
+    public class WebbShopAPI
     {
-        private int maxSessionTime = -15;
-        private int zero = 0;
+        private const int MaxSessionTime = -15;
+        private const int Zero = 0;
+
         /// <summary>
-        /// 
+        /// Admin:
+        /// If book alredy exists add amount to existing book.
+        /// If book does not exists, 
+        /// add book.
         /// </summary>
         /// <param name="adminId"></param>
         /// <param name="title"></param>
@@ -52,9 +57,18 @@ namespace WebbShopEmil
             return false;
         }
 
+        /// <summary>
+        /// Admin:
+        /// If book exist,
+        /// and if category exists,
+        /// add book to category.
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <param name="bookId"></param>
+        /// <param name="categoryId"></param>
+        /// <returns></returns>
         public bool AddBookToCategory(int adminId, int bookId, int categoryId)
         {
-
             if (UserIsAdminAndLoggedIn(adminId))
             {
 
@@ -72,8 +86,14 @@ namespace WebbShopEmil
             return false;
         }
 
-
-
+        /// <summary>
+        /// Admin:
+        /// If category does not alredy exists,
+        /// add category.
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public bool AddCategory(int adminId, string name)
         {
             if (UserIsAdminAndLoggedIn(adminId))
@@ -90,7 +110,10 @@ namespace WebbShopEmil
         }
 
         /// <summary>
-        /// 
+        /// Admin:
+        /// If user does not alredy exists, 
+        /// and if password is not empty,
+        /// add user.
         /// </summary>
         /// <param name="adminId"></param>
         /// <param name="name"></param>
@@ -112,16 +135,17 @@ namespace WebbShopEmil
         }
 
         /// <summary>
-        /// Buy book.
+        /// Admin / User:
+        /// If book exists,
+        /// buy book.
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="bookId"></param>
         /// <returns></returns>
         public bool BuyBook(int userId, int bookId)
         {
-            var user = (from u in db.Users where u.Id == userId && u.IsActive && u.SessionTimer > DateTime.Now.AddMinutes(maxSessionTime) select u).FirstOrDefault();
-
-            if (user != null && BookExists(bookId, out Book book) && book.Amount > zero)
+            var user = (from u in db.Users where u.Id == userId && u.IsActive && u.SessionTimer > DateTime.Now.AddMinutes(MaxSessionTime) select u).FirstOrDefault();
+            if (user != null && BookExists(bookId, out Book book) && book.Amount > Zero)
             {
                 if (book != null)
                 {
@@ -129,7 +153,7 @@ namespace WebbShopEmil
                     {
                         Title = book.Title,
                         Author = book.Author,
-                        CategoryId = book.Category, // Ä-----------------------------------------------------------------ndra catId till cat
+                        CategoryId = book.Category,
                         Price = book.Price,
                         PurchasedDate = DateTime.Now,
                         User = user
@@ -143,18 +167,28 @@ namespace WebbShopEmil
             return false;
         }
 
+        /// <summary>
+        /// Admin:
+        /// If book amount is more than zero subtract amount by one.
+        /// If book exists and amount is less or equal to zero,
+        /// delete book.
+        /// 
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <param name="bookId"></param>
+        /// <returns></returns>
         public bool DeleteBook(int adminId, int bookId)
         {
 
             if (UserIsAdminAndLoggedIn(adminId) && BookExists(bookId, out Book book))
             {
                 book.Amount--;
-                if (book.Amount > zero)
+                if (book.Amount > Zero)
                 {
                     db.Books.Update(book);
                     db.SaveChanges();
                 }
-                else if (book.Amount <= zero)
+                else if (book.Amount <= Zero)
                 {
                     db.Books.Remove(book);
                     db.SaveChanges();
@@ -165,13 +199,22 @@ namespace WebbShopEmil
             return false;
         }
 
+        /// <summary>
+        /// Admin:
+        /// If category exists, 
+        /// and book count is equal to zero,
+        /// delete category.
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <param name="categoryId"></param>
+        /// <returns></returns>
         public bool DeleteCategory(int adminId, int categoryId)
         {
             if (UserIsAdminAndLoggedIn(adminId) && CategoryExists(categoryId, out var category))
             {
                 var books = (from b in db.Books where b.Category == category select b);
 
-                if (books.Count() == zero)
+                if (books.Count() == Zero)
                 {
                     db.BookCategories.Remove(category);
                     db.SaveChanges();
@@ -182,12 +225,13 @@ namespace WebbShopEmil
         }
 
         /// <summary>
-        /// 
+        /// Admin:
+        /// Find users that contains a keyword that match with user name.
         /// </summary>
         /// <param name="adminId"></param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public List<User> FindUser(int adminId, string keyword)
+        public List<User> FindUsers(int adminId, string keyword)
         {
             var users = new List<User>();
             if (UserIsAdminAndLoggedIn(adminId))
@@ -198,47 +242,52 @@ namespace WebbShopEmil
         }
 
         /// <summary>
-        /// Get a list of authors that contains a specific keyword.
+        /// Admin / User:
+        /// Get authors that contains a keyword that match with author name.
         /// </summary>
         /// <param name="keyword"></param>
         /// <returns></returns>
         public List<Book> GetAuthors(string keyword)
         {
-           return (from b in db.Books where b.Author.Contains(keyword) orderby b.Title select b).ToList();
+            return (from b in db.Books where b.Author.Contains(keyword) orderby b.Title select b).ToList();
         }
 
         /// <summary>
-        /// Get a list of books by categoryId.
+        /// Admin / User:
+        /// Get available books by category.
         /// </summary>
         /// <param name="categoryId"></param>
         /// <returns></returns>
         public List<Book> GetAvailableBooks(int categoryId)
         {
-            return (from b in db.Books where b.Category.Id == categoryId && b.Amount > zero orderby b.Title select b).ToList();
+            return (from b in db.Books where b.Category.Id == categoryId && b.Amount > Zero orderby b.Title select b).ToList();
         }
 
         /// <summary>
-        /// Get a specific book by bookId.
+        ///  Admin / User:
+        /// Get a specific book by book Id.
         /// </summary>
         /// <param name="bookId"></param>
         /// <returns></returns>
-        public List<Book> GetBook(int bookId)
+        public Book GetBook(int bookId)
         {
-            return (from b in db.Books where b.Id == bookId select b).ToList();
+            return (from b in db.Books where b.Id == bookId select b).Include(b => b.Category).FirstOrDefault();
         }
 
         /// <summary>
-        /// Get a list of books that contains a specific keyword.
+        /// Admin / User:
+        /// Get books that contains a keyword that match with title name.
         /// </summary>
         /// <param name="keyword"></param>
         /// <returns></returns>
         public List<Book> GetBooks(string keyword)
         {
-            return (from b in db.Books where b.Title.Contains(keyword) orderby b.Title  select b).ToList();
+            return (from b in db.Books where b.Title.Contains(keyword) orderby b.Title select b).ToList();
         }
 
         /// <summary>
-        /// Get a list of all categories, order by name.
+        /// Admin / User:
+        /// Get all categories.
         /// </summary>
         /// <returns></returns>
         public List<BookCategory> GetCategories()
@@ -247,7 +296,8 @@ namespace WebbShopEmil
         }
 
         /// <summary>
-        /// Get a list of categories that contains a specific keyword, order by name.
+        /// Admin / User:
+        /// Get categories that contains a keyword that match with category name.
         /// </summary>
         /// <param name="keyword"></param>
         /// <returns></returns>
@@ -257,7 +307,8 @@ namespace WebbShopEmil
         }
 
         /// <summary>
-        /// Get a list of category that has a specific categoryId.
+        /// Admin / User:
+        /// Get category that has a specific category Id.
         /// </summary>
         /// <param name="categoryID"></param>
         /// <returns></returns>
@@ -267,7 +318,8 @@ namespace WebbShopEmil
         }
 
         /// <summary>
-        /// 
+        /// Admin:
+        /// List all users:
         /// </summary>
         /// <param name="adminId"></param>
         /// <returns></returns>
@@ -282,7 +334,8 @@ namespace WebbShopEmil
         }
 
         /// <summary>
-        /// 
+        /// Admin / User: 
+        /// Login user or admin.
         /// </summary>
         /// <param name="username"></param>
         /// <param name="password"></param>
@@ -302,39 +355,44 @@ namespace WebbShopEmil
         }
 
         /// <summary>
-        /// Logout user if DateTime is not updated in 15 min (maxSessionTime).
+        /// Admin / User: 
+        /// Logout user or admin.
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public bool Logout(int userId)
+        public void Logout(int userId)
         {
             var user = (from u in db.Users where u.Id == userId select u).FirstOrDefault();
-            if (user != null && user.SessionTimer > DateTime.Now.AddMinutes(maxSessionTime))
+            if (user != null)
             {
                 user.SessionTimer = DateTime.MinValue;
                 db.Users.Update(user);
                 db.SaveChanges();
-                return true;
             }
-            return false;
         }
+
         /// <summary>
-        /// 
+        /// Admin / User:
+        /// Ping.
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
         public string Ping(int userId)
         {
-            var user = (from u in db.Users where u.Id == userId && u.IsActive select u).FirstOrDefault();
-            if (user != null && user.SessionTimer > DateTime.Now.AddMinutes(maxSessionTime))
+            if (UserExists(userId, out User user) && user.SessionTimer > DateTime.Now.AddMinutes(MaxSessionTime))
             {
+                user.SessionTimer = DateTime.Now;
+                db.Users.Update(user);
+                db.SaveChanges();
                 return "Pong";
             }
             return string.Empty;
         }
 
         /// <summary>
-        /// Register new user if the user dont alredy exists. 
+        /// User:
+        /// If the user dont alredy exists,
+        /// register new user.
         /// </summary>
         /// <param name="name"></param>
         /// <param name="password"></param>
@@ -355,15 +413,29 @@ namespace WebbShopEmil
             }
             return false;
         }
-        public void SetAmount(int adminId, int bookId)
-        {
-            if (UserIsAdminAndLoggedIn(adminId))
-            {
 
+        /// <summary>
+        /// Admin:
+        /// If book exists,
+        /// sets the book amount.
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <param name="bookId"></param>
+        /// <param name="amount"></param>
+        public void SetAmount(int adminId, int bookId, int amount)
+        {
+            if (UserIsAdminAndLoggedIn(adminId) && BookExists(bookId, out Book book))
+            {
+                book.Amount = amount;
+                db.Books.Update(book);
+                db.SaveChanges();
             }
         }
+
         /// <summary>
-        /// 
+        /// Admin:
+        /// If book exists,
+        /// update book.
         /// </summary>
         /// <param name="adminId"></param>
         /// <param name="id"></param>
@@ -384,8 +456,11 @@ namespace WebbShopEmil
             }
             return false;
         }
+
         /// <summary>
-        /// 
+        /// Admin:
+        /// If category exists
+        /// update category.
         /// </summary>
         /// <param name="adminId"></param>
         /// <param name="categoryId"></param>
@@ -395,10 +470,10 @@ namespace WebbShopEmil
         {
             if (UserIsAdminAndLoggedIn(adminId) && CategoryExists(categoryId, out BookCategory category))
             {
-                    category.Name = name;
-                    db.BookCategories.Update(category);
-                    db.SaveChanges();
-                    return true;
+                category.Name = name;
+                db.BookCategories.Update(category);
+                db.SaveChanges();
+                return true;
             }
             return false;
         }

@@ -9,6 +9,6 @@ namespace WebbShopEmil.Models
     {
         [Key]
         public int Id { get; set; }
-        public string Name { get; set; }// key required
+        public string Name { get; set; }
     }
 }
