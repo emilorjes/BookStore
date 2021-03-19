@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using WebbShopEmil.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
+using WebbShopEmil.Database;
 using WebbShopEmil.Models;
 
 namespace WebbShopEmil.Helper
@@ -47,11 +45,12 @@ namespace WebbShopEmil.Helper
                         in db.BookCategories
                         where c.Id == categoryId
                         select c).FirstOrDefault();
+
             return category != null;
         }
 
         /// <summary>
-        /// Prints out a list of authors that contains keyword. 
+        /// Prints out a list of authors that contains keyword.
         /// </summary>
         /// <param name="webbShop"></param>
         /// <param name="keyword"></param>
@@ -77,7 +76,7 @@ namespace WebbShopEmil.Helper
         }
 
         /// <summary>
-        /// Prints out a list of books that contains keyword. 
+        /// Prints out a list of books that contains keyword.
         /// </summary>
         /// <param name="webbShop"></param>
         /// <param name="keyword"></param>
@@ -90,7 +89,7 @@ namespace WebbShopEmil.Helper
         }
 
         /// <summary>
-        /// Prints out a list of all categories. 
+        /// Prints out a list of all categories.
         /// </summary>
         /// <param name="webbShop"></param>
         public static void ForeachGetCategories(WebbShopAPI webbShop)
@@ -102,7 +101,7 @@ namespace WebbShopEmil.Helper
         }
 
         /// <summary>
-        /// Prints out a list of categories that contains keyword. 
+        /// Prints out a list of categories that contains keyword.
         /// </summary>
         /// <param name="webbShop"></param>
         /// <param name="keyword"></param>
@@ -160,6 +159,7 @@ namespace WebbShopEmil.Helper
                     in db.Users
                     where u.Id == userId
                     select u).FirstOrDefault();
+
             return user != null;
         }
 

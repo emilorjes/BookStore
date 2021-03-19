@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 
 namespace WebbShopEmil.Database
 {
-    class Seeder
+    internal class Seeder
     {
         private const int Zero = 0;
+
+        /// <summary>
+        /// Creates objects to the database.
+        /// </summary>
         public static void Seed()
         {
             using (var db = new WebbShopContext())
