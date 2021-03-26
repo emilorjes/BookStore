@@ -9,12 +9,12 @@ namespace WebbShopEmil.Database
     public class WebbShopContext : DbContext
     {
         /// <summary>
-        /// Datebasename
+        /// Datebasename.
         /// </summary>
         public string DatabaseName { get; set; } = "WebbShopEmilÖrjes";
 
         /// <summary>
-        /// The Models DBset
+        /// The Models DBset.
         /// </summary>
         public DbSet<User> Users { get; set; }
         public DbSet<BookCategory> BookCategories { get; set; }

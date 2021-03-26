@@ -8,6 +8,9 @@ using static WebbShopEmil.Helper.HelpMethods;
 
 namespace WebbShopEmil
 {
+    /// <summary>
+    /// API (application programming interface).
+    /// </summary>
     public class WebbShopAPI
     {
         private const int MaxSessionTime = -15;
@@ -64,7 +67,7 @@ namespace WebbShopEmil
                 {
                     var book = (from b
                                 in db.Books
-                                where b.Id == id
+                                where b.Title == title && b.Author == author
                                 select b).FirstOrDefault();
 
                     if (book != null)
@@ -136,7 +139,8 @@ namespace WebbShopEmil
         {
             try
             {
-                if (UserIsAdminAndLoggedIn(adminId) && !string.IsNullOrEmpty(name))
+                if (UserIsAdminAndLoggedIn(adminId) 
+                    && !string.IsNullOrEmpty(name))
                 {
                     var category = (from c
                                     in db.BookCategories
@@ -302,6 +306,7 @@ namespace WebbShopEmil
                 {
                     db.Books.Update(book);
                     db.SaveChanges();
+                    return true;
                 }
                 else if (book.Amount <= Zero)
                 {
@@ -388,6 +393,15 @@ namespace WebbShopEmil
 
             return users;
         }
+
+        /// <summary>
+        /// Get all books
+        /// </summary>
+        /// <returns></returns>
+        public List<Book> GetAllBooks()
+        {
+            return (from b in db.Books orderby b.Id select b).ToList();
+        } 
 
         /// <summary>
         /// Admin / User:
@@ -543,7 +557,7 @@ namespace WebbShopEmil
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public int Login(string username, string password)
+        public User Login(string username, string password)
         {
             var user = (from u
                         in db.Users
@@ -558,10 +572,10 @@ namespace WebbShopEmil
                 user.LastLogin = DateTime.Now;
                 db.Users.Update(user);
                 db.SaveChanges();
-                return user.Id;
+                return user;
             }
 
-            return 0;
+            return new User { };
         }
 
         /// <summary>
@@ -606,7 +620,7 @@ namespace WebbShopEmil
 
         /// <summary>
         /// Admin / User:
-        /// Ping.
+        /// Resets the session timer.
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>

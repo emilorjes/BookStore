@@ -2,7 +2,7 @@
 
 namespace WebbShopEmil.Database
 {
-    internal class Seeder
+   public class Seeder
     {
         private const int Zero = 0;
 

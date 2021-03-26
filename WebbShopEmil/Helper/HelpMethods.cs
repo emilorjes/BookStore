@@ -6,6 +6,9 @@ using WebbShopEmil.Models;
 
 namespace WebbShopEmil.Helper
 {
+    /// <summary>
+    /// Methods that makes the program easier to handle and maintain.
+    /// </summary>
     public static class HelpMethods
     {
         public static WebbShopContext db = new WebbShopContext();
@@ -182,6 +185,19 @@ namespace WebbShopEmil.Helper
                              select u).FirstOrDefault();
 
             return adminUser != null;
+        }
+
+        public static bool IsUserAdmin(int adminId)
+        {
+            var admin = (from u in db.Users
+                         where u.Id == adminId
+                         && u.IsActive
+                         && u.IsAdmin
+                         && u.SessionTimer > DateTime.Now.AddMinutes(MaxSessionTime)
+                         select u).FirstOrDefault();
+
+            if (admin != null) admin.SessionTimer = DateTime.Now;
+            return admin != null;
         }
     }
 }
