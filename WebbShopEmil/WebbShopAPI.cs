@@ -113,8 +113,7 @@ namespace WebbShopEmil
             {
                 if (BookExists(bookId, out var book))
                 {
-                    if (CategoryExists(categoryId, out var category)
-                        && categoryId != book.Category.Id)
+                    if (CategoryExists(categoryId, out var category))
                     {
                         book.Category = category;
                         db.Books.Update(book);
@@ -400,7 +399,7 @@ namespace WebbShopEmil
         /// <returns></returns>
         public List<Book> GetAllBooks()
         {
-            return (from b in db.Books orderby b.Id select b).ToList();
+            return (from b in db.Books orderby b.Id select b).Include(b => b.Category).ToList();
         } 
 
         /// <summary>
