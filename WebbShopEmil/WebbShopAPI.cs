@@ -138,7 +138,7 @@ namespace WebbShopEmil
         {
             try
             {
-                if (UserIsAdminAndLoggedIn(adminId) 
+                if (UserIsAdminAndLoggedIn(adminId)
                     && !string.IsNullOrEmpty(name))
                 {
                     var category = (from c
@@ -394,13 +394,22 @@ namespace WebbShopEmil
         }
 
         /// <summary>
+        /// Get all books that have amount over zero.
+        /// </summary>
+        /// <returns></returns>
+        public List<Book> GetAllAvailableBooks()
+        {
+            return (from b in db.Books where b.Amount > 0 orderby b.Id select b).ToList();
+        }
+
+        /// <summary>
         /// Get all books
         /// </summary>
         /// <returns></returns>
         public List<Book> GetAllBooks()
         {
-            return (from b in db.Books orderby b.Id select b).Include(b => b.Category).ToList();
-        } 
+            return (from b in db.Books orderby b.Id select b).ToList();
+        }
 
         /// <summary>
         /// Admin / User:
@@ -673,7 +682,7 @@ namespace WebbShopEmil
             try
             {
                 if (!string.IsNullOrEmpty(name)
-                    && !string.IsNullOrEmpty(password) 
+                    && !string.IsNullOrEmpty(password)
                     && password == passwordVerify)
                 {
                     var user = (from u
@@ -689,9 +698,8 @@ namespace WebbShopEmil
                             Password = password,
                             IsAdmin = false,
                             IsActive = true
-                        });  
+                        });
 
-                       
                         db.SaveChanges();
                         return true;
                     }
