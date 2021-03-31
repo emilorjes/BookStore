@@ -459,7 +459,7 @@ namespace WebbShopEmil
                     in db.Books
                     where b.Title.Contains(keyword)
                     orderby b.Title
-                    select b).ToList();
+                    select b).Include(b => b.Category).ToList();
         }
 
         /// <summary>
@@ -672,17 +672,13 @@ namespace WebbShopEmil
         {
             try
             {
-                if (string.IsNullOrEmpty(name)
-                    || string.IsNullOrEmpty(password))
-                {
-                    return false;
-                }
-                if (password == passwordVerify)
+                if (!string.IsNullOrEmpty(name)
+                    && !string.IsNullOrEmpty(password) 
+                    && password == passwordVerify)
                 {
                     var user = (from u
-                                in db.Users
+                             in db.Users
                                 where u.Name == name
-                                && u.Password == password
                                 select u).FirstOrDefault();
 
                     if (user == null)
@@ -693,9 +689,9 @@ namespace WebbShopEmil
                             Password = password,
                             IsAdmin = false,
                             IsActive = true
-                        }); ;
+                        });  
 
-                        db.Users.Update(user);
+                       
                         db.SaveChanges();
                         return true;
                     }
